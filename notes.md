@@ -1,6 +1,7 @@
 https://flask-migrate.readthedocs.io/en/latest/
 http://flask-sqlalchemy.pocoo.org/2.3/quickstart/
 https://docs.sqlalchemy.org/en/latest/core/
+https://flask-wtf.readthedocs.io/en/stable/quickstart.html
 
 
 cd app
