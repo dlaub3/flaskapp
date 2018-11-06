@@ -18,7 +18,7 @@ class PhoneNumberForm(FlaskForm):
     id = StringField('id')
     person_id = StringField('person_id', validators=[DataRequired()])
     type_id = StringField('type_id', validators=[DataRequired()])
-    phone_number = StringField('email_address', validators=[DataRequired()])
+    phone_number = StringField('phone_number', validators=[DataRequired()])
 
 class AddressForm(FlaskForm):
     id = StringField('id')
