@@ -24,6 +24,9 @@ class Person(db.Model):
         default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, nullable=False,
         default=datetime.utcnow)
+    addresses = db.relationship('Address', cascade="all,delete", backref='Person', lazy=True)
+    email_address = db.relationship('EmailAddress', cascade="all,delete", backref='Person', lazy=True)
+    phone_number = db.relationship('PhoneNumber', cascade="all,delete", backref='Person', lazy=True)
 
 class Address(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -54,7 +57,7 @@ class PhoneNumber(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     person_id = db.Column(db.Integer, db.ForeignKey("person.id"), nullable=False)
     type_id = db.Column(db.Integer, db.ForeignKey('type.id'), nullable=False)
-    phone_number = db.Column(db.Integer())
+    phone_number = db.Column(db.String(128))
     created_at = db.Column(db.DateTime, nullable=False,
         default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, nullable=False,
