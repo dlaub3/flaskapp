@@ -6,6 +6,7 @@ from config import DevelopmentConfig
 from healthcheck import HealthCheck, EnvironmentDump
 from models import *
 from forms import *
+from flask_cors import CORS
 import json
 
 app = Flask(__name__)
@@ -14,6 +15,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://admin:root@db:5432/flaskap
 app.config['FLASK_DEBUG'] = 1
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+CORS(app)
 db = SQLAlchemy(app)
 
 health = HealthCheck(app, "/healthcheck")
@@ -43,20 +45,23 @@ def ping():
 
 # @improvement - how to generate person_fields from model?
 # Person
-person_fields = ('first_name', 'last_name', 'date_of_birth')
+person_fields = ('id', 'first_name', 'last_name', 'date_of_birth')
 @app.route("/person", methods=['POST'])
 def add_person():
     form = PersonForm()
-    person = Person() 
+    person = Person()
     json_data = dict()
     for field in person_fields:
+        app.logger.warning(vars(form))
+        if field == 'id': continue
         json_data[field] = getattr(form, field).data;
         setattr(person, field, getattr(form, field).data);
     try:
-        db.session.add(person)
+        saved = db.session.add(person)
         db.session.commit()
+        json_data['id'] = person.id
     except Exception as e:
-        Response(response='{"status": "server error"}', status=500, headers=None, mimetype=None, content_type='application/json', direct_passthrough=False)
+        Response(response='{"status": "server error"}', status=500, headers=['Access-Control-Allow-Origin', '*'], mimetype=None, content_type='application/json', direct_passthrough=False)
     
     return jsonify(json_data)
 
