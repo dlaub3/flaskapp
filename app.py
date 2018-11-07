@@ -49,26 +49,19 @@ def ping():
     return "pong"
 
 
-# @improvement - how to generate person_fields from model?
-# Person
-person_fields = ('id', 'first_name', 'last_name', 'date_of_birth')
-
-
-@app.route("/person", methods=['GET'])
-def search_person():
-
+def sql_search_builder(schema, args):
     query = dict()
     sql_query = dict()
-    for field in request.args:
-        query[field] = '%' + request.args.get(field) + '%'
+    for field in args:
+        query[field] = '%' + args.get(field) + '%'
         sql_query[field] = field + '::text' + ' ilike :' + field
 
     where = ' AND '.join(v for v in sql_query.values())
-    sql = "SELECT * FROM person where " + where
+    sql = 'SELECT * FROM ' + schema + ' where ' + where
+    return sql, query
 
-    results = db.session.query(Person).from_statement(
-        text(sql)).params(**query).all()
 
+def object_to_json(obj, obj_fields):
     # http://codeandlife.com/2014/12/07/sqlalchemy-results-to-json-the-easy-way/
     def alchemyencoder(obj):
         """JSON encoder function for SQLAlchemy special classes."""
@@ -77,16 +70,29 @@ def search_person():
         elif isinstance(obj, decimal.Decimal):
             return float(obj)
 
-    def map_json(person):
+    def map_json(obj):
         json_data = dict()
-        for field in person_fields:
-            json_data[field] = getattr(person, field)
+        for field in obj_fields:
+            json_data[field] = getattr(obj, field)
         return json_data
 
-    results = json.dumps([map_json(r)
-                          for r in results], default=alchemyencoder)
+    objson = json.dumps([map_json(o)
+                         for o in obj], default=alchemyencoder)
+    return objson
 
-    return results
+
+# @improvement - how to generate person_fields from model?
+# Person
+person_fields = ('id', 'first_name', 'last_name', 'date_of_birth')
+
+
+@app.route("/person", methods=['GET'])
+def search_person():
+    sql, query = sql_search_builder('person', request.args)
+    results = db.session.query(Person).from_statement(
+        text(sql)).params(**query).all()
+
+    return object_to_json(results, person_fields)
 
 
 @app.route("/person", methods=['POST'])
@@ -148,6 +154,15 @@ address_fields = ('person_id', 'type_id', 'address_1',
                   'address_2', 'city', 'state', 'zip', 'country')
 
 
+@app.route("/address", methods=['GET'])
+def search_address():
+    sql, query = sql_search_builder('address', request.args)
+    results = db.session.query(Address).from_statement(
+        text(sql)).params(**query).all()
+
+    return object_to_json(results, address_fields)
+
+
 @app.route("/address", methods=['POST'])
 def add_address():
     form = AddressForm()
@@ -200,6 +215,15 @@ def delete_address(address_id):
 
 # Email
 email_address_fields = ('person_id', 'type_id', 'email_address')
+
+
+@app.route("/email-address", methods=['GET'])
+def search_email_address():
+    sql, query = sql_search_builder('email_address', request.args)
+    results = db.session.query(EmailAddress).from_statement(
+        text(sql)).params(**query).all()
+
+    return object_to_json(results, email_address_fields)
 
 
 @app.route("/email-address", methods=['POST'])
@@ -257,6 +281,15 @@ def delete_email_address(email_address_id):
 
 # PhoneNumber
 phone_number_fields = ('person_id', 'type_id', 'phone_number')
+
+
+@app.route("/phone-number", methods=['GET'])
+def search_phone_number():
+    sql, query = sql_search_builder('phone_number', request.args)
+    results = db.session.query(PhoneNumber).from_statement(
+        text(sql)).params(**query).all()
+
+    return object_to_json(results, phone_number_fields)
 
 
 @app.route("/phone-number", methods=['POST'])
