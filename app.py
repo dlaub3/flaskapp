@@ -17,8 +17,8 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 CORS(app)
 db = SQLAlchemy(app)
 
-health = HealthCheck(app, "/healthcheck")
-envdump = EnvironmentDump(app, "/environment")
+health = HealthCheck(app, "/api/healthcheck")
+envdump = EnvironmentDump(app, "/api/environment")
 
 
 class Person(db.Model):
@@ -105,7 +105,7 @@ def database_status():
 health.add_check(database_status)
 
 
-@app.route("/ping", methods=['GET'])
+@app.route("/api/ping", methods=['GET'])
 def ping():
     return "pong"
 
