@@ -120,7 +120,12 @@ manager = APIManager(app, flask_sqlalchemy_db=db)
 # manager.create_api(
 #     Person, methods=['GET', 'POST', 'PUT', 'DELETE'], exclude_columns=filters_person include_columns=[''])
 
-manager.create_api(Person, methods=['GET', 'POST', 'PUT', 'DELETE'])
+manager.create_api(
+    Person, methods=['GET', 'POST', 'PUT', 'DELETE'])
+manager.create_api(EmailAddress, methods=['GET', 'DELETE'])
+manager.create_api(PhoneNumber, methods=['GET', 'DELETE'])
+manager.create_api(Address, methods=['GET', 'DELETE'])
+manager.create_api(Type, methods=['GET', 'DELETE'])
 
 manager.create_api(Type, methods=['GET', 'POST', 'PUT', 'DELETE'])
 
